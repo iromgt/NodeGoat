@@ -127,16 +127,7 @@ module.exports = function(grunt) {
                 NODE_ENV: "test"
             }
         },
-        retire: {
-            js: [],
-            node: ["./"],
-            options: {
-                verbose: true,
-                packageOnly: true,
-                jsRepository: "https://raw.github.com/bekk/retire.js/master/repository/jsrepository.json",
-                nodeRepository: "https://raw.github.com/bekk/retire.js/master/repository/npmrepository.json",
-            }
-        }
+
 
     });
 
@@ -148,7 +139,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-concurrent");
     grunt.loadNpmTasks("grunt-env");
     grunt.loadNpmTasks("grunt-jsbeautifier");
-    grunt.loadNpmTasks("grunt-retire"); // run as: grunt retire
+ 
     grunt.loadNpmTasks("grunt-if");
     
     // Making grunt default to force in order not to break the project.
