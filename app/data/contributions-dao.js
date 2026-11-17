@@ -25,40 +25,33 @@ function ContributionsDAO(db) {
             roth: roth
         };
 
-        contributionsDB.update({
-            userId
-            },
-            contributions, {
-                upsert: true
-            },
-            err => {
-                if (!err) {
-                    console.log("Updated contributions");
-                    // add user details
-                    userDAO.getUserById(parsedUserId, (err, user) => {
+       contributionsDB.updateOne(
+    { userId },
+    { $set: contributions },
+    { upsert: true }
+)
+.then(() => {
+    console.log("Updated contributions");
 
-                        if (err) return callback(err, null);
+    userDAO.getUserById(parsedUserId, (err, user) => {
+        if (err) return callback(err, null);
+        if (!user) return callback(new Error("Usuario no encontrado"), null);
 
-                        contributions.userName = user.userName;
-                        contributions.firstName = user.firstName;
-                        contributions.lastName = user.lastName;
-                        contributions.userId = userId;
+        contributions.userName = user.userName;
+        contributions.firstName = user.firstName;
+        contributions.lastName = user.lastName;
+        contributions.userId = userId;
 
-                        return callback(null, contributions);
-                    });
-                } else {
-                    return callback(err, null);
-                }
-            }
-        );
+        return callback(null, contributions);
+    });
+})
+.catch((err) => callback(err, null));
     };
 
     this.getByUserId = (userId, callback) => {
         contributionsDB.findOne({
-                userId: userId
-            },
-            (err, contributions) => {
-                if (err) return callback(err, null);
+    userId: userId
+}).then((contributions) => {
 
                 // Set defualt contributions if not set
                 contributions = contributions || {
@@ -76,11 +69,10 @@ function ContributionsDAO(db) {
                     contributions.lastName = user.lastName;
                     contributions.userId = userId;
 
-                    callback(null, contributions);
-                });
-            }
-        );
-    };
+                   callback(null, contributions);
+        });
+    }).catch((err) => callback(err, null));
+};
 }
 
 module.exports = { ContributionsDAO };

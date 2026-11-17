@@ -99,16 +99,16 @@ module.exports = function(grunt) {
                             return require.resolve("chromedriver");
                         } catch (e) {
                             console.log(e);
-                            console.log("We will now try to install it.");
-                            console.log("If this fails, please try installing manually,");
-                            console.log("there may be some help here:");
-                            console.log("https://github.com/vuejs/vue-router/issues/261#issuecomment-218618180");
-                            throw e;
+
+ 
+
+      
+                            return false;
                         }
                     }
                 },
                 ifTrue: ["mochaTest:security"],
-                ifFalse: ["npm-install:chromedriver@^2.21.2", "mochaTest:security"]
+               ifFalse: ["chromedriver-missing"]
             }
         },
         mochaTest: {
@@ -127,16 +127,7 @@ module.exports = function(grunt) {
                 NODE_ENV: "test"
             }
         },
-        retire: {
-            js: [],
-            node: ["./"],
-            options: {
-                verbose: true,
-                packageOnly: true,
-                jsRepository: "https://raw.github.com/bekk/retire.js/master/repository/jsrepository.json",
-                nodeRepository: "https://raw.github.com/bekk/retire.js/master/repository/npmrepository.json",
-            }
-        }
+
 
     });
 
@@ -148,10 +139,9 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks("grunt-concurrent");
     grunt.loadNpmTasks("grunt-env");
     grunt.loadNpmTasks("grunt-jsbeautifier");
-    grunt.loadNpmTasks("grunt-retire"); // run as: grunt retire
+ 
     grunt.loadNpmTasks("grunt-if");
-    grunt.loadNpmTasks("grunt-npm-install");
-
+    
     // Making grunt default to force in order not to break the project.
     grunt.option("force", true);
 
@@ -184,6 +174,9 @@ module.exports = function(grunt) {
     grunt.registerTask("test", ["env:test", "mochaTest:unit"]);
 
     // Security test task.
+    grunt.registerTask("chromedriver-missing", function() {
+        grunt.fail.fatal("ChromeDriver no está instalado. Configure Chrome/Chromium y una versión compatible de ChromeDriver antes de ejecutar las pruebas de seguridad.");
+    });
     grunt.registerTask("testsecurity", ["env:test", "if:testSecurityDependenciesInstalled"]);
 
     // start server.
