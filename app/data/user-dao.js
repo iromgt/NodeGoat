@@ -37,7 +37,9 @@ function UserDAO(db) {
             console.log(typeof(id));
 
             user._id = id;
-            usersCol.insert(user, (err, result) => !err ? callback(null, result.ops[0]) : callback(err, null));
+ usersCol.insertOne(user)
+    .then(() => callback(null, user))
+    .catch((err) => callback(err, null));
         });
     };
 
@@ -92,23 +94,25 @@ function UserDAO(db) {
     };
 
     this.getUserByUserName = (userName, callback) => {
-        usersCol.findOne({
-            userName: userName
-        }, callback);
-    };
+    usersCol.findOne({ userName: userName })
+        .then((user) => callback(null, user))
+        .catch((err) => callback(err, null));
+};
 
     this.getNextSequence = (name, callback) => {
-        db.collection("counters").findAndModify({
-                _id: name
-            }, [], {
-                $inc: {
-                    seq: 1
-                }
-            }, {
-                new: true
-            },
-            (err, data) =>  err ? callback(err, null) : callback(null, data.value.seq));
-    };
+    db.collection("counters").findOneAndUpdate(
+        { _id: name },
+        { $inc: { seq: 1 } },
+        { returnDocument: "after" }
+    )
+    .then((data) => {
+        if (!data) {
+            return callback(new Error("Contador no encontrado"), null);
+        }
+        callback(null, data.seq);
+    })
+    .catch((err) => callback(err, null));
+};
 }
 
 module.exports = { UserDAO };

@@ -12,32 +12,25 @@ function BenefitsDAO(db) {
 
     const usersCol = db.collection("users");
 
-    this.getAllNonAdminUsers = callback => {
-        usersCol.find({
-            "isAdmin": {
-                $ne: true
-            }
-        }).toArray((err, users) => callback(null, users));
-    };
+    this.getAllNonAdminUsers = (callback) => {
+    usersCol.find({
+        isAdmin: { $ne: true }
+    }).toArray()
+        .then((users) => callback(null, users))
+        .catch((err) => callback(err, null));
+};
 
     this.updateBenefits = (userId, startDate, callback) => {
-        usersCol.update({
-                _id: parseInt(userId)
-            }, {
-                $set: {
-                    benefitStartDate: startDate
-                }
-            },
-            (err, result) => {
-                if (!err) {
-                    console.log("Updated benefits");
-                    return callback(null, result);
-                }
-
-                return callback(err, null);
-            }
-        );
-    };
-}
+    usersCol.updateOne(
+        { _id: parseInt(userId, 10) },
+        { $set: { benefitStartDate: startDate } }
+    )
+    .then((result) => {
+        console.log("Updated benefits");
+        callback(null, result);
+    })
+    .catch((err) => callback(err, null));
+};
+    }
 
 module.exports = { BenefitsDAO };

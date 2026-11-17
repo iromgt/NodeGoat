@@ -16,44 +16,38 @@ const AllocationsDAO = function(db){
     const userDAO = new UserDAO(db);
 
     this.update = (userId, stocks, funds, bonds, callback) => {
-        const parsedUserId = parseInt(userId);
+    const parsedUserId = parseInt(userId, 10);
 
-        // Create allocations document
-        const allocations = {
-            userId: userId,
-            stocks: stocks,
-            funds: funds,
-            bonds: bonds
-        };
-
-        allocationsCol.update({
-            userId: parsedUserId
-        }, allocations, {
-            upsert: true
-        }, err => {
-
-            if (!err) {
-
-                console.log("Updated allocations");
-
-                userDAO.getUserById(userId, (err, user) => {
-
-                    if (err) return callback(err, null);
-
-                    // add user details
-                    allocations.userId = userId;
-                    allocations.userName = user.userName;
-                    allocations.firstName = user.firstName;
-                    allocations.lastName = user.lastName;
-
-                    return callback(null, allocations);
-                });
-            }
-
-            return callback(err, null);
-        });
+    const allocations = {
+        userId: parsedUserId,
+        stocks: stocks,
+        funds: funds,
+        bonds: bonds
     };
 
+    allocationsCol.updateOne(
+        { userId: parsedUserId },
+        { $set: allocations },
+        { upsert: true }
+    )
+    .then(() => {
+        console.log("Updated allocations");
+
+        userDAO.getUserById(userId, (err, user) => {
+            if (err) return callback(err, null);
+            if (!user) {
+                return callback(new Error("Usuario no encontrado"), null);
+            }
+
+            allocations.userName = user.userName;
+            allocations.firstName = user.firstName;
+            allocations.lastName = user.lastName;
+
+            return callback(null, allocations);
+        });
+    })
+    .catch((err) => callback(err, null));
+};
     this.getByUserIdAndThreshold = (userId, threshold, callback) => {
         const parsedUserId = parseInt(userId);
 
